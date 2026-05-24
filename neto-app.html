@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neto — Envía dinero a Colombia</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#FFF9F4; --surface:#fff; --surface2:#FFF4EC;
+  --border:#F0E6DC; --accent:#FF5C2B; --green:#00C48C;
+  --yellow:#FFB800; --text:#1A0F0A; --muted:#9B8B82; --light:#FFF4EC;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;font-size:15px}
+.page{display:none}
+.page.active{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+nav{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.logo{font-family:'Fraunces',serif;font-size:26px;font-weight:800;cursor:pointer}
+.logo em{color:var(--accent);font-style:normal}
+.nav-r{display:flex;gap:8px;align-items:center}
+.btn-out{background:none;border:1.5px solid var(--border);color:var(--text);padding:9px 18px;border-radius:100px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:500;transition:all .2s}
+.btn-out:hover{border-color:var(--accent);color:var(--accent)}
+.btn-cta{background:var(--accent);border:none;color:#fff;padding:10px 20px;border-radius:100px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;transition:all .2s;box-shadow:0 4px 14px rgba(255,92,43,.35)}
+.btn-cta:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,92,43,.45)}
+/* HERO */
+.hero{max-width:900px;margin:0 auto;padding:52px 24px 36px;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1.5px solid var(--border);padding:6px 14px;border-radius:100px;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:22px}
+.dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;display:inline-block}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.75)}}
+.hero h1{font-family:'Fraunces',serif;font-size:clamp(34px,6vw,58px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:14px}
+.hero h1 .wave{color:var(--accent)}
+.hero p{font-size:16px;color:var(--muted);line-height:1.65;max-width:460px;margin:0 auto 32px}
+/* CALC CARD */
+.calc-wrap{max-width:500px;margin:0 auto;padding:0 20px 52px}
+.calc-card{background:var(--surface);border-radius:26px;box-shadow:0 8px 40px rgba(26,15,10,.12);overflow:hidden}
+.calc-head{background:linear-gradient(135deg,var(--accent),#FF8C5A);padding:22px 26px 18px;color:#fff}
+.calc-head-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.calc-head-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:.8}
+.rate-live{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;opacity:.9}
+.calc-rate-sm{font-family:'Fraunces',serif;font-size:13px;opacity:.85}
+.calc-body{padding:22px 26px}
+.amt-lbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.amt-wrap{display:flex;align-items:center;background:var(--light);border:2px solid transparent;border-radius:14px;overflow:hidden;transition:border-color .2s}
+.amt-wrap:focus-within{border-color:var(--accent);background:var(--surface)}
+.cur-tag{padding:13px 15px;font-weight:800;font-size:15px;color:var(--accent);background:rgba(255,92,43,.08);border-right:2px solid var(--border);min-width:70px;text-align:center}
+.amt-inp{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:'Fraunces',serif;font-size:26px;font-weight:700;padding:10px 14px;letter-spacing:-.5px}
+.amt-inp::placeholder{color:#D4C4BB}
+.swap{display:flex;align-items:center;justify-content:center;padding:7px 0}
+.swap::before,.swap::after{content:'';flex:1;height:1px;background:var(--border)}
+.swap-icon{width:34px;height:34px;background:var(--surface);border:2px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;margin:0 10px;flex-shrink:0}
+.result-big{font-family:'Fraunces',serif;font-size:38px;font-weight:800;color:var(--text);letter-spacing:-1.5px;line-height:1}
+.result-big span{font-size:17px;color:var(--muted);font-weight:600;margin-left:4px}
+.save-pill{display:none;align-items:center;gap:5px;background:rgba(0,196,140,.1);color:var(--green);padding:4px 12px;border-radius:100px;font-size:12px;font-weight:700;margin-top:6px}
+.verify-lnk{display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;color:var(--muted);margin:8px 0 4px;cursor:pointer;text-decoration:none}
+.verify-lnk:hover{color:var(--accent)}
+/* BREAKDOWN */
+.bkdown{background:var(--light);border-radius:12px;padding:13px 15px;margin:12px 0;display:none}
+.bkdown.show{display:block}
+.bd-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px}
+.bd-row:not(:last-child){border-bottom:1px solid var(--border);padding-bottom:7px;margin-bottom:2px}
+.bd-lbl{color:var(--muted)}
+.bd-val{font-weight:600;color:var(--text)}
+.bd-val.green{color:var(--green)}
+.bd-total{padding-top:8px;margin-top:3px;border-top:2px solid var(--border)!important}
+.bd-total .bd-lbl{font-weight:700;color:var(--text);font-size:14px}
+.bd-total .bd-val{font-size:16px;font-weight:800;color:var(--accent)}
+/* PRICE LOCK */
+.p-lock{background:#FFF8E6;border:1.5px solid #FFE08A;border-radius:11px;padding:12px 15px;margin:10px 0;display:none}
+.p-lock.show{display:block}
+.lock-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.lock-lbl{font-size:13px;font-weight:600;color:#B45309;display:flex;align-items:center;gap:5px}
+.lock-timer{font-family:'Fraunces',serif;font-size:22px;font-weight:800;color:#B45309}
+.lock-timer.red{color:var(--accent)}
+.lock-bar{height:4px;background:#FFE08A;border-radius:2px;overflow:hidden}
+.lock-prog{height:100%;background:#F59E0B;border-radius:2px;transition:width 1s linear}
+.lock-prog.red{background:var(--accent)}
+/* BUTTONS */
+.btn-main{width:100%;background:var(--accent);border:none;color:#fff;padding:16px;border-radius:14px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:700;transition:all .2s;box-shadow:0 4px 18px rgba(255,92,43,.35);margin-top:4px}
+.btn-main:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,92,43,.45)}
+.btn-main:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+.fine{text-align:center;font-size:11px;color:var(--muted);margin-top:9px;line-height:1.6}
+/* COMPARE */
+.cmp-section{max-width:500px;margin:0 auto;padding:0 20px 52px}
+.sec-lbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);text-align:center;margin-bottom:14px}
+.cmp-list{display:flex;flex-direction:column;gap:9px}
+.cmp-item{background:var(--surface);border:1.5px solid var(--border);border-radius:15px;padding:13px 17px;display:flex;justify-content:space-between;align-items:center}
+.cmp-item.winner{border-color:var(--green);background:rgba(0,196,140,.04)}
+.ci-l{display:flex;align-items:center;gap:10px}
+.ci-ico{font-size:20px}
+.ci-name{font-weight:700;font-size:15px}
+.ci-cop{font-size:12px;color:var(--muted);margin-top:2px}
+.ci-fee{font-weight:800;font-size:17px;font-family:'Fraunces',serif}
+.cmp-item.winner .ci-fee{color:var(--green)}
+.cmp-item:not(.winner) .ci-fee{color:var(--accent)}
+.win-badge{background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;margin-left:6px;letter-spacing:.5px}
+/* HOW */
+.how-sec{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:44px 24px;margin-bottom:52px}
+.how-in{max-width:500px;margin:0 auto}
+.how-title{font-family:'Fraunces',serif;font-size:28px;font-weight:800;letter-spacing:-.5px;margin-bottom:28px;text-align:center}
+.steps{display:flex;flex-direction:column}
+.step{display:flex;gap:14px;padding:18px 0;border-bottom:1px solid var(--border)}
+.step:last-child{border-bottom:none}
+.step-n{width:38px;height:38px;background:var(--light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:800;font-size:17px;color:var(--accent);flex-shrink:0}
+.step-title{font-weight:700;font-size:15px;margin-bottom:3px}
+.step-desc{font-size:13px;color:var(--muted);line-height:1.55}
+/* AUTH */
+.auth-wrap{min-height:calc(100vh - 65px);display:flex;align-items:flex-start;justify-content:center;padding:30px 20px}
+.auth-card{background:var(--surface);border-radius:26px;padding:34px 30px;width:100%;max-width:400px;box-shadow:0 8px 40px rgba(26,15,10,.1)}
+.auth-emoji{font-size:38px;margin-bottom:14px;display:block}
+.auth-title{font-family:'Fraunces',serif;font-size:27px;font-weight:800;letter-spacing:-.5px;margin-bottom:5px}
+.auth-sub{font-size:14px;color:var(--muted);margin-bottom:26px;line-height:1.5}
+.fg{margin-bottom:14px}
+.fl{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:6px}
+.fi{width:100%;background:var(--light);border:2px solid transparent;border-radius:12px;padding:12px 14px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;outline:none;transition:all .2s}
+.fi:focus{border-color:var(--accent);background:var(--surface)}
+.fi::placeholder{color:#C4B3A9}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.auth-tog{text-align:center;font-size:14px;color:var(--muted);margin-top:14px}
+.auth-tog a{color:var(--accent);cursor:pointer;font-weight:600}
+.demo-btn{width:100%;background:var(--light);border:1.5px solid var(--border);color:var(--text);padding:12px;border-radius:12px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:600;transition:all .2s;margin-top:8px}
+.demo-btn:hover{border-color:var(--accent);color:var(--accent)}
+/* DASHBOARD */
+.dash-wrap{max-width:580px;margin:0 auto;padding:22px 20px 72px}
+.dash-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.dash-greet{font-family:'Fraunces',serif;font-size:25px;font-weight:800;letter-spacing:-.5px}
+.dash-greet span{color:var(--accent)}
+.icon-btn{width:38px;height:38px;background:var(--light);border:none;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:22px}
+.stat-card{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;padding:16px}
+.stat-card.ac{background:var(--accent);border-color:var(--accent)}
+.stat-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:7px}
+.stat-card.ac .stat-lbl{color:rgba(255,255,255,.75)}
+.stat-val{font-family:'Fraunces',serif;font-size:24px;font-weight:800;letter-spacing:-.5px;color:var(--text)}
+.stat-card.ac .stat-val{color:#fff}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.stat-card.ac .stat-sub{color:rgba(255,255,255,.7)}
+/* SEND CARD */
+.send-card{background:var(--surface);border:1.5px solid var(--border);border-radius:22px;padding:22px;margin-bottom:22px}
+.send-title{font-family:'Fraunces',serif;font-size:19px;font-weight:800;margin-bottom:18px}
+.rcpt-field{display:flex;align-items:center;gap:10px;background:var(--light);border:2px solid transparent;border-radius:12px;padding:11px 14px;margin-bottom:11px;transition:border-color .2s}
+.rcpt-field:focus-within{border-color:var(--accent);background:var(--surface)}
+.rcpt-field input{flex:1;background:none;border:none;outline:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;color:var(--text)}
+.rcpt-field input::placeholder{color:#C4B3A9}
+.rcpt-ico{font-size:17px;flex-shrink:0}
+/* BANK SELECTOR */
+.bank-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:11px}
+.bank-opt{background:var(--light);border:2px solid transparent;border-radius:11px;padding:10px 11px;cursor:pointer;display:flex;align-items:center;gap:7px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;color:var(--muted);transition:all .2s}
+.bank-opt:hover{border-color:var(--accent);color:var(--text)}
+.bank-opt.sel{border-color:var(--accent);background:rgba(255,92,43,.05);color:var(--text)}
+.bank-ico{font-size:17px}
+.fgrp{display:none;margin-bottom:11px}
+.fgrp.show{display:block}
+.sel-inp{width:100%;background:var(--light);border:2px solid transparent;border-radius:12px;padding:12px 14px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;outline:none;transition:all .2s;margin-bottom:11px;cursor:pointer}
+.sel-inp:focus{border-color:var(--accent);background:var(--surface)}
+.hint{font-size:12px;color:var(--muted);margin:-6px 0 9px 3px;line-height:1.4}
+/* HISTORY */
+.hist-title{font-family:'Fraunces',serif;font-size:19px;font-weight:800;margin-bottom:14px}
+.tx-empty{text-align:center;padding:36px 18px;color:var(--muted);font-size:14px;line-height:1.6;background:var(--surface);border-radius:18px;border:1.5px dashed var(--border)}
+.tx-empty .ei{font-size:38px;margin-bottom:10px;display:block}
+.tx-list{display:flex;flex-direction:column;gap:9px}
+.tx-item{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;transition:all .2s}
+.tx-item:hover{border-color:var(--accent);transform:translateX(2px)}
+.tx-l{display:flex;align-items:center;gap:11px}
+.tx-av{width:40px;height:40px;background:var(--light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.tx-name{font-weight:700;font-size:14px;margin-bottom:2px}
+.tx-meta{font-size:12px;color:var(--muted)}
+.tx-r{text-align:right}
+.tx-pln{font-family:'Fraunces',serif;font-weight:800;font-size:15px}
+.tx-cop{font-size:12px;color:var(--muted);margin-bottom:3px}
+.tx-badge{display:inline-flex;align-items:center;gap:3px;background:rgba(0,196,140,.1);color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px}
+/* MODAL */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(26,15,10,.5);backdrop-filter:blur(8px);z-index:500;align-items:center;justify-content:center;padding:22px}
+.modal-ov.show{display:flex}
+.modal-card{background:var(--surface);border-radius:26px;padding:38px 30px;max-width:360px;width:100%;text-align:center;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-ico{width:76px;height:76px;background:rgba(0,196,140,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 18px}
+.modal-title{font-family:'Fraunces',serif;font-size:27px;font-weight:800;margin-bottom:7px}
+.modal-sub{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:22px}
+.modal-amt{background:var(--light);border-radius:14px;padding:14px;margin-bottom:22px}
+.mal{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.mav{font-family:'Fraunces',serif;font-size:30px;font-weight:800;color:var(--green);letter-spacing:-1px}
+/* SPINNER */
+.spin{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;margin-right:7px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(max-width:480px){.hero{padding:36px 16px 28px}.calc-wrap,.cmp-section{padding-left:14px;padding-right:14px}.fr{grid-template-columns:1fr}.auth-card{padding:26px 18px}.stats-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo" onclick="goHome()">net<em>o</em></div>
+  <div class="nav-r" id="nav-auth">
+    <button class="btn-out" onclick="showPage('login')">Entrar</button>
+    <button class="btn-cta" onclick="showPage('register')">Empezar gratis</button>
+  </div>
+  <div class="nav-r" id="nav-user" style="display:none">
+    <button class="btn-out" onclick="logout()">Salir</button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-badge"><span class="dot"></span>1 PLN = <span id="hero-rate">...</span> COP · En vivo</div>
+    <h1>Tu familia recibe<br>más. <span class="wave">Sin trampa.</span></h1>
+    <p>Envía złotych a Colombia en minutos. Tasa igual a Google. Sin comisiones ocultas. Nunca.</p>
+  </div>
+  <div class="calc-wrap">
+    <div class="calc-card">
+      <div class="calc-head">
+        <div class="calc-head-top">
+          <span class="calc-head-lbl">Calculadora</span>
+          <span class="rate-live"><span class="dot" style="background:#fff"></span>En vivo</span>
+        </div>
+        <div class="calc-rate-sm" id="calc-rate-sm">Cargando tasa...</div>
+      </div>
+      <div class="calc-body">
+        <div style="margin-bottom:8px">
+          <div class="amt-lbl">🇵🇱 Tú envías</div>
+          <div class="amt-wrap">
+            <div class="cur-tag">PLN</div>
+            <input type="number" class="amt-inp" id="pln-input" placeholder="100" value="100" oninput="updateCalc()">
+          </div>
+        </div>
+        <div class="swap"><div class="swap-icon">↓</div></div>
+        <div style="margin-bottom:10px">
+          <div class="amt-lbl">🇨🇴 Tu familia recibe</div>
+          <div style="padding:11px 14px;background:var(--light);border-radius:14px;min-height:60px;display:flex;flex-direction:column;justify-content:center">
+            <div class="result-big" id="cop-result">— <span>COP</span></div>
+            <div class="save-pill" id="save-pill">🎉 <span id="save-txt"></span> más que WU</div>
+          </div>
+        </div>
+        <a class="verify-lnk" href="https://www.google.com/search?q=1+PLN+to+COP" target="_blank">🔍 Verificar tasa en Google</a>
+        <div class="bkdown" id="calc-bd">
+          <div class="bd-row"><span class="bd-lbl">Tasa mid-market (= Google)</span><span class="bd-val" id="bd-rate">—</span></div>
+          <div class="bd-row"><span class="bd-lbl">Comisión Neto (todo incluido)</span><span class="bd-val" id="bd-fee">—</span></div>
+          <div class="bd-row"><span class="bd-lbl">Spread oculto</span><span class="bd-val green">0 PLN — nunca ✓</span></div>
+        </div>
+        <div class="p-lock" id="home-lock">
+          <div class="lock-top"><span class="lock-lbl">🔒 Precio garantizado por</span><span class="lock-timer" id="home-timer">60s</span></div>
+          <div class="lock-bar"><div class="lock-prog" id="home-prog" style="width:100%"></div></div>
+        </div>
+        <button class="btn-main" onclick="lockAndRegister()">Enviar ahora →</button>
+        <div class="fine">Sin sorpresas · Tasa = Google · Soporte en español 🇨🇴🇵🇱</div>
+      </div>
+    </div>
+  </div>
+  <div class="cmp-section">
+    <div class="sec-lbl">Enviando 500 PLN hoy</div>
+    <div class="cmp-list">
+      <div class="cmp-item winner">
+        <div class="ci-l"><span class="ci-ico">🟢</span><div><div class="ci-name">neto <span class="win-badge">MEJOR</span></div><div class="ci-cop" id="neto-cop">calculando...</div></div></div>
+        <div class="ci-fee" style="color:var(--green)" id="neto-fee-pct">~2.8%</div>
+      </div>
+      <div class="cmp-item">
+        <div class="ci-l"><span class="ci-ico">🔵</span><div><div class="ci-name">Wise</div><div class="ci-cop" id="wise-cop">calculando...</div></div></div>
+        <div class="ci-fee">~2.1%</div>
+      </div>
+      <div class="cmp-item">
+        <div class="ci-l"><span class="ci-ico">🟠</span><div><div class="ci-name">Remitly</div><div class="ci-cop" id="remitly-cop">calculando...</div></div></div>
+        <div class="ci-fee">~5%</div>
+      </div>
+      <div class="cmp-item">
+        <div class="ci-l"><span class="ci-ico">🔴</span><div><div class="ci-name">Western Union</div><div class="ci-cop" id="wu-cop">calculando...</div></div></div>
+        <div class="ci-fee">~8.8%</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:11px;font-size:11px;color:var(--muted)">* WU y Remitly usan tasa peor que Google. Neto usa la tasa exacta de Google.</div>
+  </div>
+  <div class="how-sec">
+    <div class="how-in">
+      <div class="how-title">Tres pasos. Eso es todo.</div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div><div class="step-title">Crea tu cuenta gratis</div><div class="step-desc">Dos minutos. Solo tu email. Sin papeles, sin banco.</div></div></div>
+        <div class="step"><div class="step-n">2</div><div><div class="step-title">Ingresa cuánto quieres enviar</div><div class="step-desc">Ves exactamente cuánto recibe tu familia antes de pagar.</div></div></div>
+        <div class="step"><div class="step-n">3</div><div><div class="step-title">Llega en minutos a Nequi o Bancolombia</div><div class="step-desc">Notificación inmediata. En el celular antes de que cierres la app.</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div id="page-register" class="page">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <span class="auth-emoji">👋</span>
+      <div class="auth-title">Crea tu cuenta</div>
+      <div class="auth-sub">Gratis para siempre. Sin tarjeta requerida.</div>
+      <div class="fr">
+        <div class="fg"><label class="fl">Nombre</label><input type="text" class="fi" id="reg-name" placeholder="Tu nombre"></div>
+        <div class="fg"><label class="fl">Apellido</label><input type="text" class="fi" id="reg-last" placeholder="Apellido"></div>
+      </div>
+      <div class="fg"><label class="fl">Email</label><input type="email" class="fi" id="reg-email" placeholder="tu@email.com"></div>
+      <div class="fg"><label class="fl">WhatsApp</label><input type="tel" class="fi" id="reg-phone" placeholder="+48 XXX XXX XXX"></div>
+      <div class="fg"><label class="fl">Contraseña</label><input type="password" class="fi" id="reg-pass" placeholder="Mínimo 8 caracteres"></div>
+      <button class="btn-main" id="reg-btn" onclick="doRegister()">Crear cuenta →</button>
+      <div class="auth-tog">¿Ya tienes cuenta? <a onclick="showPage('login')">Entra aquí</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="page-login" class="page">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <span class="auth-emoji">🔑</span>
+      <div class="auth-title">Bienvenido</div>
+      <div class="auth-sub">Entra a tu cuenta de neto.</div>
+      <div class="fg"><label class="fl">Email</label><input type="email" class="fi" id="login-email" placeholder="tu@email.com"></div>
+      <div class="fg"><label class="fl">Contraseña</label><input type="password" class="fi" id="login-pass" placeholder="Tu contraseña"></div>
+      <button class="btn-main" id="login-btn" onclick="doLogin()">Entrar →</button>
+      <button class="demo-btn" onclick="doDemo()">🎮 Entrar con cuenta demo</button>
+      <div class="auth-tog">¿No tienes cuenta? <a onclick="showPage('register')">Regístrate gratis</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="page">
+  <div class="dash-wrap">
+    <div class="dash-top">
+      <div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:3px">¡Hola de nuevo!</div>
+        <div class="dash-greet"><span id="dash-name">...</span> 👋</div>
+      </div>
+      <button class="icon-btn" onclick="logout()">🚪</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card ac">
+        <div class="stat-lbl">Enviado este mes</div>
+        <div class="stat-val" id="stat-sent">0 PLN</div>
+        <div class="stat-sub" id="stat-cop">0 COP recibidos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">Ahorro vs WU</div>
+        <div class="stat-val" id="stat-saved" style="color:var(--green)">0 PLN</div>
+        <div class="stat-sub">dinero que no perdiste</div>
+      </div>
+    </div>
+    <!-- SEND -->
+    <div class="send-card">
+      <div class="send-title">📤 Nuevo envío</div>
+      <div class="rcpt-field"><span class="rcpt-ico">👤</span><input type="text" id="s-name" placeholder="Nombre completo de quien recibe"></div>
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px">¿Dónde recibe en Colombia?</div>
+      <div class="bank-grid">
+        <button class="bank-opt" onclick="pickBank('nequi')" id="bk-nequi"><span class="bank-ico">📱</span>Nequi</button>
+        <button class="bank-opt" onclick="pickBank('daviplata')" id="bk-daviplata"><span class="bank-ico">💜</span>Daviplata</button>
+        <button class="bank-opt" onclick="pickBank('bancolombia')" id="bk-bancolombia"><span class="bank-ico">🏦</span>Bancolombia</button>
+        <button class="bank-opt" onclick="pickBank('otro')" id="bk-otro"><span class="bank-ico">🏛️</span>Otro banco</button>
+      </div>
+      <div class="fgrp" id="fg-nequi">
+        <div class="rcpt-field"><span class="rcpt-ico">📞</span><input type="tel" id="s-cel-nequi" placeholder="Celular registrado en Nequi (ej: 300 123 4567)"></div>
+        <div class="hint">Solo necesitas el número celular Nequi</div>
+      </div>
+      <div class="fgrp" id="fg-daviplata">
+        <div class="rcpt-field"><span class="rcpt-ico">📞</span><input type="tel" id="s-cel-davi" placeholder="Celular registrado en Daviplata"></div>
+        <div class="hint">Solo necesitas el número celular Daviplata</div>
+      </div>
+      <div class="fgrp" id="fg-bancolombia">
+        <div class="rcpt-field"><span class="rcpt-ico">🔢</span><input type="text" id="s-acc-banco" placeholder="Número de cuenta Bancolombia"></div>
+        <select class="sel-inp" id="s-tipo-banco"><option value="">Tipo de cuenta</option><option value="ahorros">Cuenta de ahorros</option><option value="corriente">Cuenta corriente</option></select>
+      </div>
+      <div class="fgrp" id="fg-otro">
+        <select class="sel-inp" id="s-banco-nom"><option value="">Selecciona el banco</option><option>Davivienda</option><option>BBVA Colombia</option><option>Banco de Bogotá</option><option>Banco de Occidente</option><option>Banco Popular</option><option>Itaú</option><option>Scotiabank Colpatria</option><option>GNB Sudameris</option><option>Banco Agrario</option><option>Banco Caja Social</option><option>Banco Falabella</option><option>Banco Pichincha</option><option>Coopcentral</option></select>
+        <div class="rcpt-field"><span class="rcpt-ico">🔢</span><input type="text" id="s-acc-otro" placeholder="Número de cuenta"></div>
+        <select class="sel-inp" id="s-tipo-otro"><option value="">Tipo de cuenta</option><option value="ahorros">Cuenta de ahorros</option><option value="corriente">Cuenta corriente</option></select>
+        <div class="rcpt-field"><span class="rcpt-ico">🪪</span><input type="text" id="s-cedula" placeholder="Cédula del receptor"></div>
+        <div class="hint">Requerida por los bancos colombianos para transferencias internacionales</div>
+      </div>
+      <div style="margin:14px 0 10px">
+        <div class="amt-lbl">🇵🇱 Monto a enviar</div>
+        <div class="amt-wrap">
+          <div class="cur-tag">PLN</div>
+          <input type="number" class="amt-inp" id="s-amount" placeholder="100" oninput="updateSendCalc()">
+        </div>
+      </div>
+      <div class="bkdown" id="send-bd">
+        <div class="bd-row"><span class="bd-lbl">Tasa mid-market (= Google)</span><span class="bd-val" id="sbd-rate">—</span></div>
+        <div class="bd-row"><span class="bd-lbl">Comisión Neto (todo incluido)</span><span class="bd-val" id="sbd-fee">—</span></div>
+        <div class="bd-row"><span class="bd-lbl">Spread oculto</span><span class="bd-val green">0 PLN ✓</span></div>
+        <div class="bd-row bd-total"><span class="bd-lbl">Tu familia recibe</span><span class="bd-val" id="sbd-total" style="color:var(--green)">—</span></div>
+      </div>
+      <div class="p-lock" id="send-lock">
+        <div class="lock-top"><span class="lock-lbl">🔒 Precio bloqueado</span><span class="lock-timer" id="send-timer">60s</span></div>
+        <div class="lock-bar"><div class="lock-prog" id="send-prog" style="width:100%"></div></div>
+      </div>
+      <button class="btn-main" id="send-btn" onclick="doSend()" style="margin-top:11px">Bloquear precio y enviar →</button>
+    </div>
+    <div>
+      <div class="hist-title">📋 Historial</div>
+      <div id="tx-wrap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-ov" id="modal">
+  <div class="modal-card">
+    <div class="modal-ico">✅</div>
+    <div class="modal-title">¡Reserva lista!</div>
+    <div class="modal-sub">Tu envío está reservado. Te contactaremos por WhatsApp en los próximos 30 minutos para completar el pago.</div>
+    <div class="modal-amt">
+      <div class="mal">Tu familia recibirá</div>
+      <div class="mav" id="modal-amt">—</div>
+    </div>
+    <div style="background:var(--light);border-radius:14px;padding:14px;margin-bottom:20px;text-align:left">
+      <div style="font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Resumen del envío</div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Receptor</span><span id="modal-recipient" style="font-weight:600">—</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Destino</span><span id="modal-bank" style="font-weight:600">—</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Monto</span><span id="modal-pln" style="font-weight:600">—</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0"><span style="color:var(--muted)">Comisión Neto</span><span id="modal-fee" style="font-weight:600">—</span></div>
+    </div>
+    <div style="background:rgba(255,184,0,.08);border:1.5px solid rgba(255,184,0,.3);border-radius:12px;padding:12px 14px;margin-bottom:20px;font-size:13px;color:#B45309;line-height:1.5">
+      📱 Te escribiremos al WhatsApp registrado para coordinar el pago. Por favor tenlo disponible.
+    </div>
+    <button class="btn-main" onclick="closeModal()">Ver mi panel →</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════
+// SUPABASE + STRIPE CONFIG
+// ══════════════════════════════════
+const SUPA_URL = 'https://pvfknkmpjijtgygxxocx.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2Zmtua21wamlqdGd5Z3h4b2N4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MDYyMjYsImV4cCI6MjA5NTE4MjIyNn0.cb8CGsXgr_y-ZI5I6i7-4jkWFVmOhTH3Nz40ptaKcXc';
+const STRIPE_KEY = 'pk_test_51TaNYh2WMJ7LKYlAmuAv8pv3BwlQYp0f1yNnPQwsFjWsUWF2GnhFjY9iywRePtdEpMjklAnsIpyUwpmLUqX8isZ400YyIGYDJ6';
+
+async function supa(method, table, body, query='') {
+  const url = SUPA_URL + '/rest/v1/' + table + (query ? '?' + query : '');
+  const res = await fetch(url, {
+    method,
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : ''
+    },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+// ══════════════════════════════════
+// CONFIG — un solo lugar para todo
+// ══════════════════════════════════
+const C = {
+  // Fee dinámico — no tocar salvo decisión estratégica
+  stripe_pct:  0.014,   // Stripe Europa 1.4%
+  stripe_fix:  0.25,    // Stripe fee fijo EUR
+  wise_cost:   0.004,   // Costo Wise 0.4%
+  margin:      0.010,   // Tu ganancia neta: 1% fijo siempre
+  min:         50,      // PLN mínimo
+  max:         10000,   // PLN máximo
+  lock:        60,      // segundos price lock
+  // Competencia
+  wu_fee:      0.058,
+  wu_spr:      0.030,
+  wise_fee:    0.021,
+  rem_fee:     0.035,
+  rem_spr:     0.015,
+};
+
+// Fee dinámico — baja con el monto, nunca pierde dinero
+function calcFee(pln) {
+  const stripe  = (pln * C.stripe_pct) + C.stripe_fix;
+  const wise    = pln * C.wise_cost;
+  const margin  = pln * C.margin;
+  const total   = stripe + wise + margin;
+  const pct     = ((total / pln) * 100).toFixed(2);
+  return { total, pct, stripe, wise, margin };
+}
+
+// ══ STATE ══
+let user = null;
+let rate = null;
+let locked = null;
+let lockInt = null;
+let lockSec = 0;
+let selBank = null;
+let txs  = JSON.parse(localStorage.getItem('neto_tx')    || '[]');
+let usrs = JSON.parse(localStorage.getItem('neto_users') || '[]');
+
+// ══ RATE ══
+async function fetchRate() {
+  try {
+    const r = await fetch('https://api.exchangerate-api.com/v4/latest/PLN');
+    const d = await r.json();
+    rate = d.rates.COP;
+  } catch(e) { rate = 1016; }
+  const fmt = Math.round(rate).toLocaleString('es-CO');
+  document.getElementById('hero-rate').textContent = fmt;
+  document.getElementById('calc-rate-sm').textContent = `1 PLN = ${fmt} COP · Tasa real de mercado`;
+  updateCalc();
+  updateCompare();
+}
+
+// ══ CALC ══
+function updateCalc() {
+  if (!rate) return;
+  const pln = parseFloat(document.getElementById('pln-input').value) || 0;
+  const bd = document.getElementById('calc-bd');
+  if (pln <= 0) { bd.classList.remove('show'); return; }
+  const r = locked || rate;
+  const fees = calcFee(pln);
+  const cop = Math.round((pln - fees.total) * r);
+  const wuCop = Math.round(pln * (1 - C.wu_fee) * r * (1 - C.wu_spr));
+  const saving = Math.round((cop - wuCop) / 1000);
+  document.getElementById('cop-result').innerHTML = `${cop.toLocaleString('es-CO')} <span>COP</span>`;
+  const pill = document.getElementById('save-pill');
+  if (saving > 0) { document.getElementById('save-txt').textContent = `+${saving}K COP`; pill.style.display = 'inline-flex'; }
+  else { pill.style.display = 'none'; }
+  bd.classList.add('show');
+  document.getElementById('bd-rate').textContent = `1 PLN = ${Math.round(r).toLocaleString('es-CO')} COP`;
+  document.getElementById('bd-fee').textContent = `${fees.total.toFixed(2)} PLN (${fees.pct}%)`;
+}
+
+function updateSendCalc() {
+  if (!rate) return;
+  const pln = parseFloat(document.getElementById('s-amount').value) || 0;
+  const bd = document.getElementById('send-bd');
+  if (pln <= 0) { bd.classList.remove('show'); return; }
+  const r = locked || rate;
+  const fees = calcFee(pln);
+  const cop = Math.round((pln - fees.total) * r);
+  bd.classList.add('show');
+  document.getElementById('sbd-rate').textContent = `1 PLN = ${Math.round(r).toLocaleString('es-CO')} COP`;
+  document.getElementById('sbd-fee').textContent = `${fees.total.toFixed(2)} PLN (${fees.pct}%)`;
+  document.getElementById('sbd-total').textContent = `${cop.toLocaleString('es-CO')} COP`;
+}
+
+function updateCompare() {
+  if (!rate) return;
+  const ref = 500;
+  const fees = calcFee(ref);
+  const nCop  = Math.round((ref - fees.total) * rate);
+  const wCop  = Math.round(ref * (1 - C.wise_fee) * rate);
+  const rCop  = Math.round(ref * (1 - C.rem_fee) * rate * (1 - C.rem_spr));
+  const wuCop = Math.round(ref * (1 - C.wu_fee) * rate * (1 - C.wu_spr));
+  const fmt = n => `${n.toLocaleString('es-CO')} COP`;
+  document.getElementById('neto-cop').textContent    = fmt(nCop);
+  document.getElementById('wise-cop').textContent    = fmt(wCop);
+  document.getElementById('remitly-cop').textContent = fmt(rCop);
+  document.getElementById('wu-cop').textContent      = fmt(wuCop);
+  // Update neto fee display dynamically
+  document.getElementById('neto-fee-pct').textContent = fees.pct + '%';
+}
+
+// ══ PRICE LOCK ══
+function startLock(timerId, progId, lockId, onEnd) {
+  clearInterval(lockInt);
+  locked = rate;
+  lockSec = C.lock;
+  document.getElementById(lockId).classList.add('show');
+  lockInt = setInterval(() => {
+    lockSec--;
+    const pct = (lockSec / C.lock) * 100;
+    document.getElementById(timerId).textContent = lockSec + 's';
+    document.getElementById(progId).style.width = pct + '%';
+    if (lockSec <= 10) {
+      document.getElementById(timerId).classList.add('red');
+      document.getElementById(progId).classList.add('red');
+    }
+    if (lockSec <= 0) {
+      clearInterval(lockInt);
+      locked = null;
+      document.getElementById(lockId).classList.remove('show');
+      document.getElementById(timerId).classList.remove('red');
+      document.getElementById(progId).classList.remove('red');
+      if (onEnd) onEnd();
+    }
+  }, 1000);
+}
+
+function lockAndRegister() {
+  const pln = parseFloat(document.getElementById('pln-input').value) || 0;
+  if (pln >= C.min) startLock('home-timer','home-prog','home-lock', updateCalc);
+  setTimeout(() => showPage('register'), 500);
+}
+
+// ══ BANK SELECTOR ══
+function pickBank(b) {
+  selBank = b;
+  document.querySelectorAll('.bank-opt').forEach(el => el.classList.remove('sel'));
+  document.getElementById('bk-' + b).classList.add('sel');
+  ['nequi','daviplata','bancolombia','otro'].forEach(k => {
+    document.getElementById('fg-' + k).classList.toggle('show', k === b);
+  });
+}
+
+function getRecipient() {
+  const name = document.getElementById('s-name').value.trim();
+  if (!selBank || !name) return null;
+  if (selBank === 'nequi') {
+    const cel = document.getElementById('s-cel-nequi').value.trim();
+    return cel ? { bank:'Nequi', account:cel, name } : null;
+  }
+  if (selBank === 'daviplata') {
+    const cel = document.getElementById('s-cel-davi').value.trim();
+    return cel ? { bank:'Daviplata', account:cel, name } : null;
+  }
+  if (selBank === 'bancolombia') {
+    const acc  = document.getElementById('s-acc-banco').value.trim();
+    const tipo = document.getElementById('s-tipo-banco').value;
+    return (acc && tipo) ? { bank:'Bancolombia', account:acc, tipo, name } : null;
+  }
+  if (selBank === 'otro') {
+    const banco = document.getElementById('s-banco-nom').value;
+    const acc   = document.getElementById('s-acc-otro').value.trim();
+    const tipo  = document.getElementById('s-tipo-otro').value;
+    const ced   = document.getElementById('s-cedula').value.trim();
+    return (banco && acc && tipo && ced) ? { bank:banco, account:acc, tipo, cedula:ced, name } : null;
+  }
+  return null;
+}
+
+// ══ AUTH ══
+async function doRegister() {
+  const name  = document.getElementById('reg-name').value.trim();
+  const last  = document.getElementById('reg-last').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const phone = document.getElementById('reg-phone').value.trim();
+  const pass  = document.getElementById('reg-pass').value;
+  if (!name || !email || !pass) { alert('Completa nombre, email y contraseña.'); return; }
+  if (pass.length < 8) { alert('La contraseña debe tener al menos 8 caracteres.'); return; }
+  const btn = document.getElementById('reg-btn');
+  btn.innerHTML = '<span class="spin"></span>Creando cuenta...';
+  btn.disabled = true;
+  try {
+    const existing = await supa('GET', 'users', null, 'email=eq.' + encodeURIComponent(email) + '&select=id');
+    if (existing && existing.length > 0) {
+      alert('Este email ya está registrado.');
+      btn.innerHTML = 'Crear cuenta →'; btn.disabled = false; return;
+    }
+    const result = await supa('POST', 'users', { name, last, email, phone, pass });
+    user = Array.isArray(result) ? result[0] : result;
+    localStorage.setItem('neto_session', JSON.stringify(user));
+    btn.innerHTML = 'Crear cuenta →'; btn.disabled = false;
+    openDash();
+  } catch(e) {
+    alert('Error: ' + e.message);
+    btn.innerHTML = 'Crear cuenta →'; btn.disabled = false;
+  }
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const btn   = document.getElementById('login-btn');
+  if (!email || !pass) { alert('Completa email y contraseña.'); return; }
+  btn.innerHTML = '<span class="spin"></span>Entrando...';
+  btn.disabled = true;
+  try {
+    const result = await supa('GET', 'users', null,
+      'email=eq.' + encodeURIComponent(email) + '&pass=eq.' + encodeURIComponent(pass) + '&select=*');
+    if (!result || result.length === 0) {
+      alert('Email o contraseña incorrectos.');
+      btn.innerHTML = 'Entrar →'; btn.disabled = false; return;
+    }
+    user = result[0];
+    localStorage.setItem('neto_session', JSON.stringify(user));
+    btn.innerHTML = 'Entrar →'; btn.disabled = false;
+    openDash();
+  } catch(e) {
+    alert('Error: ' + e.message);
+    btn.innerHTML = 'Entrar →'; btn.disabled = false;
+  }
+}
+
+function doDemo() {
+  let demo = usrs.find(u => u.email === 'demo@neto.app');
+  if (!demo) {
+    demo = { name:'Carlos', last:'Demo', email:'demo@neto.app', phone:'+48 000', pass:'demo1234', id:999 };
+    usrs.push(demo);
+    localStorage.setItem('neto_users', JSON.stringify(usrs));
+    const r = rate || 1016;
+    const demoTxs = [
+      { id:1, uid:999, name:'Mamá', bank:'Nequi', account:'3001234567', pln:300, cop:Math.round(300*.97*r), date:new Date(Date.now()-86400000*2).toISOString() },
+      { id:2, uid:999, name:'Hermano Juancho', bank:'Daviplata', account:'3107654321', pln:200, cop:Math.round(200*.97*r), date:new Date(Date.now()-86400000*9).toISOString() },
+    ];
+    txs = [...txs, ...demoTxs];
+    localStorage.setItem('neto_tx', JSON.stringify(txs));
+  }
+  user = demo;
+  localStorage.setItem('neto_session', JSON.stringify(demo));
+  openDash();
+}
+
+function logout() {
+  user = null;
+  localStorage.removeItem('neto_session');
+  document.getElementById('nav-auth').style.display = 'flex';
+  document.getElementById('nav-user').style.display = 'none';
+  showPage('home');
+}
+
+// ══ DASHBOARD ══
+async function openDash() {
+  document.getElementById('nav-auth').style.display = 'none';
+  document.getElementById('nav-user').style.display = 'flex';
+  document.getElementById('dash-name').textContent = user.name;
+  showPage('dashboard');
+  try {
+    const list = await supa('GET', 'transactions', null,
+      'user_id=eq.' + user.id + '&order=created_at.desc&select=*') || [];
+    const totPln = list.reduce((s,t) => s + parseFloat(t.pln), 0);
+    const totCop = list.reduce((s,t) => s + parseFloat(t.cop), 0);
+    const saved  = list.reduce((s,t) => s + (parseFloat(t.pln) * (C.wu_fee + C.wu_spr) - parseFloat(t.fee)), 0);
+    document.getElementById('stat-sent').textContent  = totPln.toFixed(0) + ' PLN';
+    document.getElementById('stat-cop').textContent   = Math.round(totCop).toLocaleString('es-CO') + ' COP';
+    document.getElementById('stat-saved').textContent = saved.toFixed(0) + ' PLN';
+    renderTxs(list);
+  } catch(e) { console.error(e); renderTxs([]); }
+}
+
+function renderTxs(list) {
+  const wrap = document.getElementById('tx-wrap');
+  if (!list.length) {
+    wrap.innerHTML = '<div class="tx-empty"><span class="ei">📭</span>Aún no has hecho envíos.<br>¡Tu primer envío puede llegar hoy!</div>';
+    return;
+  }
+  wrap.innerHTML = '<div class="tx-list">' + list.slice().reverse().map(t => `
+    <div class="tx-item">
+      <div class="tx-l"><div class="tx-av">📤</div><div>
+        <div class="tx-name">${t.name}</div>
+        <div class="tx-meta">${new Date(t.date).toLocaleDateString('es-CO',{day:'numeric',month:'short'})} · ${t.bank} ${t.account}</div>
+      </div></div>
+      <div class="tx-r">
+        <div class="tx-cop">${Math.round(t.cop).toLocaleString('es-CO')} COP</div>
+        <div class="tx-pln">${t.pln} PLN</div>
+        <span class="tx-badge">✓ Entregado</span>
+      </div>
+    </div>`).join('') + '</div>';
+}
+
+// ══ SEND ══
+async function doSend() {
+  const rcpt = getRecipient();
+  const pln  = parseFloat(document.getElementById('s-amount').value);
+  if (!selBank) { alert('Selecciona dónde recibe en Colombia.'); return; }
+  if (!rcpt)    { alert('Completa todos los datos del receptor.'); return; }
+  if (!pln || pln < C.min) { alert('El mínimo de envío es ' + C.min + ' PLN.'); return; }
+  if (pln > C.max) { alert('El máximo por ahora es ' + C.max + ' PLN.'); return; }
+  const btn = document.getElementById('send-btn');
+  if (!locked) {
+    startLock('send-timer','send-prog','send-lock', updateSendCalc);
+    updateSendCalc();
+    btn.textContent = 'Confirmar reserva →';
+    return;
+  }
+  btn.innerHTML = '<span class="spin"></span>Reservando...';
+  btn.disabled = true;
+  try {
+    const r = locked || rate;
+    const fees = calcFee(pln);
+    const cop = Math.round((pln - fees.total) * r);
+    await supa('POST', 'transactions', {
+      user_id: user.id,
+      recipient_name: rcpt.name,
+      bank: rcpt.bank,
+      account: rcpt.account,
+      account_type: rcpt.tipo || null,
+      cedula: rcpt.cedula || null,
+      pln, cop,
+      fee: fees.total,
+      rate: r,
+      status: 'pending'
+    });
+    clearInterval(lockInt);
+    locked = null;
+    document.getElementById('send-lock').classList.remove('show');
+    document.getElementById('modal-amt').textContent = cop.toLocaleString('es-CO') + ' COP';
+    document.getElementById('modal-recipient').textContent = rcpt.name;
+    document.getElementById('modal-pln').textContent = pln + ' PLN';
+    document.getElementById('modal-bank').textContent = rcpt.bank + ' · ' + rcpt.account;
+    document.getElementById('modal-fee').textContent = fees.total.toFixed(2) + ' PLN (' + fees.pct + '%)';
+    document.getElementById('modal').classList.add('show');
+    document.getElementById('s-name').value = '';
+    document.getElementById('s-amount').value = '';
+    document.getElementById('send-bd').classList.remove('show');
+    selBank = null;
+    document.querySelectorAll('.bank-opt').forEach(el => el.classList.remove('sel'));
+    ['nequi','daviplata','bancolombia','otro'].forEach(k => document.getElementById('fg-'+k).classList.remove('show'));
+    btn.textContent = 'Bloquear precio y enviar →';
+    btn.disabled = false;
+    openDash();
+  } catch(e) {
+    alert('Error: ' + e.message);
+    btn.textContent = 'Bloquear precio y enviar →';
+    btn.disabled = false;
+  }
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('show'); }
+
+// ══ NAV ══
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function goHome() {
+  if (user) { openDash(); } else { showPage('home'); }
+}
+
+// ══ INIT ══
+(function init() {
+  const s = localStorage.getItem('neto_session');
+  if (s) {
+    try {
+      user = JSON.parse(s);
+      openDash();
+    } catch(e) { localStorage.removeItem('neto_session'); }
+  }
+  fetchRate();
+  setInterval(fetchRate, 60000);
+})();
+</script>
+</body>
+</html>
