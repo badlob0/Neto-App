@@ -329,10 +329,12 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:18px 2
     <span style="font-family:'Fraunces',serif;font-size:24px;font-weight:800;color:#fff;letter-spacing:-0.5px">neto</span>
   </div>
   <div class="nav-r" id="nav-auth">
+    <button class="btn-out" style="font-size:12px;padding:7px 14px" onclick="showPage('terms')">Legal</button>
     <button class="btn-out" onclick="showPage('login')">Entrar</button>
     <button class="btn-cta" onclick="goHome()">Cotizar gratis</button>
   </div>
   <div class="nav-r" id="nav-user" style="display:none">
+    <button class="btn-out" style="font-size:12px;padding:7px 14px" onclick="showPage('terms')">Legal</button>
     <button class="btn-out" onclick="logout()">Salir</button>
   </div>
 </nav>
@@ -549,6 +551,7 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:18px 2
         <div class="dash-greet"><span id="dash-name">...</span> 👋</div>
       </div>
       <div style="display:flex;gap:8px">
+        <button class="icon-btn" onclick="goHome()" title="Cotizar" style="font-size:13px;width:auto;padding:0 12px;border-radius:20px">+ Cotizar</button>
         <button class="icon-btn" id="admin-btn" onclick="openAdmin()" title="Panel admin" style="display:none">⚙️</button>
         <button class="icon-btn" onclick="logout()" title="Salir">🚪</button>
       </div>
@@ -560,9 +563,9 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:18px 2
         <div class="stat-sub" id="stat-cop">0 COP recibidos</div>
       </div>
       <div class="stat-card">
-        <div class="stat-lbl">Ahorro vs WU</div>
+        <div class="stat-lbl">Ahorro vs otros</div>
         <div class="stat-val" id="stat-saved" style="color:var(--green)">0 PLN</div>
-        <div class="stat-sub">dinero que no perdiste</div>
+        <div class="stat-sub">vs Remitly y Western Union</div>
       </div>
     </div>
     <!-- SEND -->
@@ -1214,7 +1217,8 @@ async function openDash() {
       'user_id=eq.' + user.id + '&order=created_at.desc&select=*') || [];
     const totPln = list.reduce((s,t) => s + parseFloat(t.pln), 0);
     const totCop = list.reduce((s,t) => s + parseFloat(t.cop), 0);
-    const saved  = list.reduce((s,t) => s + (parseFloat(t.pln) * (C.wu_fee + C.wu_spr) - parseFloat(t.fee)), 0);
+    const avg_comp = (C.rem_fee + C.rem_spr + C.wu_fee + C.wu_spr) / 2;
+  const saved  = list.reduce((s,t) => s + (parseFloat(t.pln) * avg_comp - parseFloat(t.fee)), 0);
     document.getElementById('stat-sent').textContent  = totPln.toFixed(0) + ' PLN';
     document.getElementById('stat-cop').textContent   = Math.round(totCop).toLocaleString('es-CO') + ' COP';
     document.getElementById('stat-saved').textContent = saved.toFixed(0) + ' PLN';
