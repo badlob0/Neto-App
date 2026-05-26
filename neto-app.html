@@ -551,7 +551,7 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:18px 2
         <div class="dash-greet"><span id="dash-name">...</span> 👋</div>
       </div>
       <div style="display:flex;gap:8px">
-        <button class="icon-btn" onclick="goHome()" title="Cotizar" style="font-size:13px;width:auto;padding:0 12px;border-radius:20px">+ Cotizar</button>
+        <button class="icon-btn" onclick="goHome()" title="Ir al inicio" style="font-size:13px;width:auto;padding:0 12px;border-radius:20px">← Inicio</button>
         <button class="icon-btn" id="admin-btn" onclick="openAdmin()" title="Panel admin" style="display:none">⚙️</button>
         <button class="icon-btn" onclick="logout()" title="Salir">🚪</button>
       </div>
@@ -651,7 +651,7 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:18px 2
   <div style="max-width:640px;margin:0 auto;padding:32px 24px 80px">
 
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px">
-      <button class="back-btn" style="width:auto;padding:10px 18px" onclick="history.back()">← Volver</button>
+      <button class="back-btn" style="width:auto;padding:10px 18px" onclick="goBack()">← Volver</button>
       <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:800;color:#fff">Términos y condiciones</div>
     </div>
 
@@ -1307,10 +1307,21 @@ async function doSend() {
 function closeModal() { document.getElementById('modal').classList.remove('show'); }
 
 // ══ NAV ══
+let prevPage = 'home';
 function showPage(name) {
+  const current = document.querySelector('.page.active');
+  if (current) prevPage = current.id.replace('page-', '');
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function goBack() {
+  if (user && (prevPage === 'home' || prevPage === 'terms')) {
+    openDash();
+  } else {
+    showPage(prevPage || 'home');
+  }
 }
 
 function goHome() {
