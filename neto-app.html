@@ -1726,12 +1726,14 @@ async function fetchRate() {
     rate = d.rates.COP;
   } catch(e) { rate = 1016; }
   const fmt = Math.round(rate).toLocaleString('es-CO');
-  document.getElementById('hero-rate').textContent = fmt;
-  document.getElementById('calc-rate-sm').textContent = `1 PLN = ${fmt} COP · Tasa real de mercado`;
-  updateCalc();
-  updateCompare();
-  updateDashCompare();
-  updateFeeSimulator();
+  const heroRate = document.getElementById('hero-rate');
+  if (heroRate) heroRate.textContent = fmt;
+  const calcRateSm = document.getElementById('calc-rate-sm');
+  if (calcRateSm) calcRateSm.textContent = `1 PLN = ${fmt} COP · Tasa real de mercado`;
+  try { updateCalc(); } catch(e) {}
+  try { updateCompare(); } catch(e) {}
+  try { updateDashCompare(); } catch(e) {}
+  try { updateFeeSimulator(); } catch(e) {}
 }
 
 // ══ CALC ══
@@ -2044,9 +2046,12 @@ function logout() {
 
 // ══ DASHBOARD ══
 async function openDash() {
-  document.getElementById('nav-auth').style.display = 'none';
-  document.getElementById('nav-user').style.display = 'flex';
-  document.getElementById('dash-name').textContent = user.name;
+  const navAuth = document.getElementById('nav-auth');
+  const navUser = document.getElementById('nav-user');
+  const dashName = document.getElementById('dash-name');
+  if (navAuth) navAuth.style.display = 'none';
+  if (navUser) navUser.style.display = 'flex';
+  if (dashName) dashName.textContent = user.name;
   // Show admin button only for admin
   const adminBtn = document.getElementById('admin-btn');
   if (adminBtn) adminBtn.style.display = isAdmin() ? 'flex' : 'none';
@@ -2581,14 +2586,14 @@ function flowCalcQuote() {
   const wuCop   = Math.round(pln * (1 - C.wu_fee) * rate * (1 - C.wu_spr));
   const fmt = n => n.toLocaleString('es-CO') + ' COP';
 
-  document.getElementById('flow-cop-result').textContent = fmt(cop);
-  document.getElementById('flow-rate-display').textContent = '1 PLN = ' + Math.round(rate).toLocaleString('es-CO') + ' COP';
-  document.getElementById('flow-fee-display').textContent = fees.total.toFixed(2) + ' PLN (' + fees.pct + '%)';
-  document.getElementById('flow-rate-sub').textContent = 'Tasa real · igual a Google · ' + (flowOpt === 2 ? 'monto neto garantizado' : 'comisión descontada');
-  document.getElementById('flow-neto-cop').textContent = fmt(cop);
-
-  document.getElementById('flow-remitly-cop').textContent = fmt(remCop);
-  document.getElementById('flow-wu-cop').textContent = fmt(wuCop);
+  const _s = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  _s('flow-cop-result', fmt(cop));
+  _s('flow-rate-display', '1 PLN = ' + Math.round(rate).toLocaleString('es-CO') + ' COP');
+  _s('flow-fee-display', fees.total.toFixed(2) + ' PLN (' + fees.pct + '%)');
+  _s('flow-rate-sub', 'Tasa real · igual a Google · ' + (flowOpt === 2 ? 'monto neto garantizado' : 'comisión descontada'));
+  _s('flow-neto-cop', fmt(cop));
+  _s('flow-remitly-cop', fmt(remCop));
+  _s('flow-wu-cop', fmt(wuCop));
 }
 
 function toggleLockWhy() {
