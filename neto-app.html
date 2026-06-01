@@ -2046,35 +2046,38 @@ function logout() {
 
 // ══ DASHBOARD ══
 async function openDash() {
-  const navAuth = document.getElementById('nav-auth');
-  const navUser = document.getElementById('nav-user');
-  const dashName = document.getElementById('dash-name');
-  if (navAuth) navAuth.style.display = 'none';
-  if (navUser) navUser.style.display = 'flex';
-  if (dashName) dashName.textContent = user.name;
-  // Show admin button only for admin
-  const adminBtn = document.getElementById('admin-btn');
-  if (adminBtn) adminBtn.style.display = isAdmin() ? 'flex' : 'none';
-  showPage('dashboard');
-  checkNotifications();
-  // Start realtime listener
-  initSupabaseClient();
-  startRealtime();
-  // Update dashboard comparison
-  if (rate) updateDashCompare();
+  try {
+    const navAuth = document.getElementById('nav-auth');
+    const navUser = document.getElementById('nav-user');
+    const dashName = document.getElementById('dash-name');
+    if (navAuth) navAuth.style.display = 'none';
+    if (navUser) navUser.style.display = 'flex';
+    if (dashName) dashName.textContent = user.name;
+    const adminBtn = document.getElementById('admin-btn');
+    if (adminBtn) adminBtn.style.display = isAdmin() ? 'flex' : 'none';
+    showPage('dashboard');
+  } catch(e) { console.error('openDash UI error:', e); }
+
+  try { checkNotifications(); } catch(e) {}
+  try { initSupabaseClient(); startRealtime(); } catch(e) {}
+  try { if (rate) updateDashCompare(); } catch(e) {}
+
   try {
     const list = await supa('GET', 'transactions', null,
       'user_id=eq.' + user.id + '&order=created_at.desc&select=*') || [];
-    const totPln = list.reduce((s,t) => s + parseFloat(t.pln), 0);
-    const totCop = list.reduce((s,t) => s + parseFloat(t.cop), 0);
+    const totPln = list.reduce((s,t) => s + parseFloat(t.pln||0), 0);
+    const totCop = list.reduce((s,t) => s + parseFloat(t.cop||0), 0);
     const avg_comp = (C.rem_fee + C.rem_spr + C.wu_fee + C.wu_spr) / 2;
-  const saved  = list.reduce((s,t) => s + (parseFloat(t.pln) * avg_comp - parseFloat(t.fee)), 0);
-    document.getElementById('stat-sent').textContent  = totPln.toFixed(0) + ' PLN';
-    document.getElementById('stat-cop').textContent   = Math.round(totCop).toLocaleString('es-CO') + ' COP';
-    document.getElementById('stat-saved').textContent = saved.toFixed(0) + ' PLN';
-    renderTxs(list);
+    const saved = list.reduce((s,t) => s + (parseFloat(t.pln||0) * avg_comp - parseFloat(t.fee||0)), 0);
+    const ss = document.getElementById('stat-sent');
+    const sc = document.getElementById('stat-cop');
+    const sv = document.getElementById('stat-saved');
+    if (ss) ss.textContent = totPln.toFixed(0) + ' PLN';
+    if (sc) sc.textContent = Math.round(totCop).toLocaleString('es-CO') + ' COP';
+    if (sv) sv.textContent = saved.toFixed(0) + ' PLN';
+    try { renderTxs(list); } catch(e) { console.error('renderTxs error:', e); }
   } catch(e) {
-    console.error('Dashboard error:', e);
+    console.error('Dashboard load error:', e);
     try { renderTxs([]); } catch(e2) {}
   }
 }
@@ -2163,11 +2166,21 @@ function closeModal() { document.getElementById('modal').classList.remove('show'
 // ══ NAV ══
 let prevPage = 'home';
 function showPage(name) {
-  const current = document.querySelector('.page.active');
-  if (current) prevPage = current.id.replace('page-', '');
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  window.scrollTo({ top:0, behavior:'smooth' });
+  try {
+    const current = document.querySelector('.page.active');
+    if (current) prevPage = current.id.replace('page-', '');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById('page-' + name);
+    if (target) {
+      target.classList.add('active');
+    } else {
+      console.error('Page not found:', name);
+      // fallback to home
+      const home = document.getElementById('page-home');
+      if (home) home.classList.add('active');
+    }
+    window.scrollTo({ top:0, behavior:'smooth' });
+  } catch(e) { console.error('showPage error:', e); }
 }
 
 function goBack() {
@@ -3398,11 +3411,12 @@ function confirmDelete() {
 let deferredPrompt = null;
 
 function injectManifest() {
+  try {
   const manifest = {
     name: "neto — Enviá dinero a Colombia",
     short_name: "neto",
     description: "Remesas Polonia → Colombia. Tasa Google real. Sin comisiones ocultas.",
-    start_url: "/neto-app.html",
+    start_url: "./neto-app.html",
     display: "standalone",
     background_color: "#1F0D35",
     theme_color: "#1F0D35",
@@ -3417,6 +3431,7 @@ function injectManifest() {
   const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
   const url = URL.createObjectURL(blob);
   document.getElementById('pwa-manifest').href = url;
+  } catch(e) { console.log('Manifest error:', e); }
 }
 
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -3469,6 +3484,7 @@ function showIOSInstallGuide() {
 
 // Register service worker for offline support
 function registerSW() {
+  try {
   if ('serviceWorker' in navigator) {
     const swCode = `
       const CACHE = 'neto-v1';
@@ -3486,6 +3502,7 @@ function registerSW() {
     const url = URL.createObjectURL(blob);
     navigator.serviceWorker.register(url).catch(() => {});
   }
+  } catch(e) {}
 }
 
 // ══ INIT ══
