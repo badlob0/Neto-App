@@ -2073,25 +2073,29 @@ async function openDash() {
     document.getElementById('stat-cop').textContent   = Math.round(totCop).toLocaleString('es-CO') + ' COP';
     document.getElementById('stat-saved').textContent = saved.toFixed(0) + ' PLN';
     renderTxs(list);
-  } catch(e) { console.error(e); renderTxs([]); }
+  } catch(e) {
+    console.error('Dashboard error:', e);
+    try { renderTxs([]); } catch(e2) {}
+  }
 }
 
 function renderTxs(list) {
   const wrap = document.getElementById('tx-wrap');
+  if (!wrap) return;
   if (!list.length) {
     wrap.innerHTML = '<div class="tx-empty"><span class="ei">📭</span>Aún no has hecho envíos.<br>¡Tu primer envío puede llegar hoy!</div>';
     return;
   }
-  wrap.innerHTML = '<div class="tx-list">' + list.slice().reverse().map(t => `
+  wrap.innerHTML = '<div class="tx-list">' + list.map(t => `
     <div class="tx-item">
       <div class="tx-l"><div class="tx-av">📤</div><div>
-        <div class="tx-name">${t.name}</div>
-        <div class="tx-meta">${new Date(t.date).toLocaleDateString('es-CO',{day:'numeric',month:'short'})} · ${t.bank} ${t.account}</div>
+        <div class="tx-name">${t.recipient_name || t.name || '—'}</div>
+        <div class="tx-meta">${new Date(t.created_at || t.date || Date.now()).toLocaleDateString('es-CO',{day:'numeric',month:'short'})} · ${t.bank || '—'} ${t.account || ''}</div>
       </div></div>
       <div class="tx-r">
         <div class="tx-cop">${Math.round(t.cop).toLocaleString('es-CO')} COP</div>
         <div class="tx-pln">${t.pln} PLN</div>
-        <span class="tx-badge" style="${t.status === 'completed' ? 'background:rgba(0,196,140,.1);color:var(--green)' : 'background:rgba(255,184,0,.1);color:#B45309'}">${t.status === 'completed' ? '✓ Entregado' : '⏳ Pendiente'}</span>
+        <span class="tx-badge" style="${(t.status === 'completed') ? 'background:rgba(0,196,140,.1);color:var(--green)' : 'background:rgba(255,184,0,.1);color:#B45309'}">${(t.status === 'completed') ? '✓ Entregado' : '⏳ Pendiente'}</span>
       </div>
     </div>`).join('') + '</div>';
 }
